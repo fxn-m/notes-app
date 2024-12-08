@@ -12,21 +12,17 @@ import { LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
-export function AvatarMenu() {
-  const [isOpen, setIsOpen] = useState(false)
+import { type NotesPageProps as AvatarMenuProps } from "@/pages/NotesPage"
 
-  const handleLogout = () => {
-    // Implement your logout logic here
-    console.log("Logging out...")
-    // For example: router.push('/logout')
-  }
+export function AvatarMenu({ onLogout, userInfo }: AvatarMenuProps) {
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full shadow-xl">
           <Avatar>
-            <AvatarImage src="/avatars/01.png" alt="@username" />
+            <AvatarImage src={userInfo.picture} alt="@username" />
             <AvatarFallback>
               <User />
             </AvatarFallback>
@@ -36,16 +32,17 @@ export function AvatarMenu() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">username</p>
-            <p className="text-muted-foreground text-xs leading-none">user@example.com</p>
+            <p className="text-sm font-medium leading-none">{userInfo.name}</p>
+            <p className="text-muted-foreground text-xs leading-none">{userInfo.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem
+          onClick={() => {
+            onLogout()
+          }}
+          className="text-red-500 focus:text-red-500"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

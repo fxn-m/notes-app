@@ -3,6 +3,7 @@ import NoteOverlay, { StickyNoteType } from "@/components/NoteOverlay"
 import { AvatarMenu } from "@/components/avatar-menu"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { type UserInfo } from "@/App"
 
 type NoteBookType = {
   id: number
@@ -10,7 +11,12 @@ type NoteBookType = {
   notes: StickyNoteType[]
 }
 
-const NotesPage = () => {
+export type NotesPageProps = {
+  onLogout: () => void
+  userInfo: UserInfo
+}
+
+const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false)
   const [noteBooks, setNoteBooks] = useState<NoteBookType[]>([])
   const [activeBook, setActiveBook] = useState<NoteBookType | null>(null)
@@ -79,7 +85,7 @@ const NotesPage = () => {
 
       {/* Account info */}
       <div className="absolute bottom-4 left-4">
-        <AvatarMenu />
+        <AvatarMenu onLogout={onLogout} userInfo={userInfo} />
       </div>
     </div>
   )
