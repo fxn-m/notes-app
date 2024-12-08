@@ -1,12 +1,38 @@
+import NoteOverlay, { StickyNoteType } from "@/components/NoteOverlay"
+
 import { AvatarMenu } from "@/components/avatar-menu"
-import NoteOverlay from "@/components/NoteOverlay"
 import { useState } from "react"
+
+type NoteBookType = {
+  id: number
+  name: string
+  notes: StickyNoteType[]
+}
 
 const NotesPage = () => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false)
+  const [noteBooks, setNoteBooks] = useState<NoteBookType[]>([])
+  const [activeBook, setActiveBook] = useState<NoteBookType | null>(null)
 
-  const openOverlay = () => setIsOverlayOpen(true)
-  const closeOverlay = () => setIsOverlayOpen(false)
+  const closeOverlay = (updatedNotes: StickyNoteType[]) => {
+    setNoteBooks((prevBooks) => {
+      if (activeBook) {
+        return prevBooks.map((book) => (book.id === activeBook.id ? { ...book, notes: updatedNotes } : book))
+      } else {
+        return [
+          ...prevBooks,
+          {
+            id: Date.now(),
+            name: `New Notebook ${prevBooks.length + 1}`,
+            notes: updatedNotes
+          }
+        ]
+      }
+    })
+
+    setActiveBook(null)
+    setIsOverlayOpen(false)
+  }
 
   return (
     <div className="bg-primary relative flex min-h-screen w-screen justify-center pt-12">
@@ -19,15 +45,34 @@ const NotesPage = () => {
       <div className="relative flex w-2/3 flex-col items-center rounded-lg border border-gray-100 bg-white pt-12 shadow-xl sm:w-[500px] md:w-[650px] lg:w-[800px] xl:w-[900px] 2xl:w-[1200px]">
         <div className="w-full flex-grow px-8">
           <button
-            onClick={openOverlay}
+            onClick={() => {
+              setActiveBook(null)
+              setIsOverlayOpen(true)
+            }}
             className="flex items-center justify-center rounded-full bg-[#54A268] px-6 py-2 text-white shadow-md hover:bg-green-700"
           >
-            Open Child Document
+            Create New Notebook
           </button>
+
+          {/* Notebooks */}
+          <div className="mt-8 grid grid-cols-2 gap-4">
+            {noteBooks.map((book) => (
+              <div
+                key={book.id}
+                className="cursor-pointer rounded-lg bg-gray-100 p-4"
+                onClick={() => {
+                  setActiveBook(book)
+                  setIsOverlayOpen(true)
+                }}
+              >
+                <h2 className="text-lg font-semibold">{book.name}</h2>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Note Overlay */}
-        {isOverlayOpen && <NoteOverlay onClose={closeOverlay} />}
+        {isOverlayOpen && <NoteOverlay onClose={closeOverlay} notes={activeBook ? activeBook.notes : []} />}
       </div>
 
       {/* Account info */}

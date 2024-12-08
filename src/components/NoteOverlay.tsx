@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react"
 import Draggable from "react-draggable"
 
 interface NoteOverlayProps {
-  onClose: () => void
+  onClose: (updatedNotes: StickyNoteType[]) => void
+  notes: StickyNoteType[]
 }
 
-type StickyNoteType = {
+export type StickyNoteType = {
   id: number
   xPercent: number
   yPercent: number
@@ -16,9 +17,9 @@ type StickyNoteType = {
 
 const ANIMATION_DURATION = 500
 
-export default function NoteOverlay({ onClose }: NoteOverlayProps) {
+export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
+  const [stickyNotes, setStickyNotes] = useState<StickyNoteType[]>(notes)
   const [isVisible, setIsVisible] = useState(false)
-  const [stickyNotes, setStickyNotes] = useState<StickyNoteType[]>([])
 
   const overlayRef = useRef<HTMLDivElement>(null) // Ref for the parent container
 
@@ -28,7 +29,9 @@ export default function NoteOverlay({ onClose }: NoteOverlayProps) {
 
   const handleClose = () => {
     setIsVisible(false)
-    setTimeout(onClose, ANIMATION_DURATION)
+    setTimeout(() => {
+      onClose(stickyNotes)
+    }, ANIMATION_DURATION)
   }
 
   const addStickyNote = () => {
