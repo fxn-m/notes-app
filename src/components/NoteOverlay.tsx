@@ -73,9 +73,10 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
   return (
     <div
       ref={overlayRef}
-      className={`group absolute inset-0 z-20 flex cursor-pointer items-start justify-center transition duration-${ANIMATION_DURATION} ${
-        isVisible ? "translate-y-0" : "translate-y-full"
-      }`}
+      className={`group absolute inset-0 z-20 flex cursor-pointer items-start justify-center transition ${isVisible ? "translate-y-0" : "translate-y-full"}`}
+      style={{
+        transitionDuration: `${ANIMATION_DURATION}ms`
+      }}
     >
       {/* Gap */}
       <div className="peer absolute h-3 w-full bg-transparent" onClick={handleClose} />
