@@ -9,14 +9,14 @@ const NotesPage = () => {
   const closeOverlay = () => setIsOverlayOpen(false)
 
   return (
-    <div className="bg-primary relative flex min-h-screen w-screen justify-center px-[127px] pt-[92px]">
+    <div className="bg-primary relative flex min-h-screen w-screen justify-center pt-12">
       {/* Sidebar */}
       <div className="absolute left-4 top-4 flex h-1/2 w-[40px] flex-col items-center rounded-full border border-gray-200 bg-white px-2 py-4 shadow-lg">
         <TodoIcon width="24" height="24" />
       </div>
 
       {/* Main container */}
-      <div className="relative flex w-4/5 flex-col items-center rounded-lg border border-gray-100 bg-white pt-12 shadow-xl">
+      <div className="relative flex w-2/3 flex-col items-center rounded-lg border border-gray-100 bg-white pt-12 shadow-xl sm:w-[500px] md:w-[650px] lg:w-[800px] xl:w-[900px] 2xl:w-[1200px]">
         <div className="w-full flex-grow px-8">
           <button
             onClick={openOverlay}

@@ -7,7 +7,7 @@ function App() {
     <Router basename="/notes-app/">
       <div className="App flex min-h-screen w-screen flex-col">
         <Routes>
-          <Route path="/notes" element={<NotesPage />} />
+          <Route path="/" element={<NotesPage />} />
         </Routes>
       </div>
     </Router>
