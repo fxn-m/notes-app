@@ -1,12 +1,16 @@
-import Counter from '@/components/Counter'
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+
+import NotesPage from "@/pages/NotesPage"
 
 function App() {
-
   return (
-    <div className='w-screen flex flex-col items-center gap-8'>
-      <h1 className='text-4xl font-bold mt-10'>Hello!</h1>
-      <Counter />
-    </div>
+    <Router basename="/notes-app/">
+      <div className="App flex min-h-screen w-screen flex-col">
+        <Routes>
+          <Route path="/notes" element={<NotesPage />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 
