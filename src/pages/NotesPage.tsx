@@ -1,20 +1,33 @@
 import { AvatarMenu } from "@/components/avatar-menu"
+import NoteOverlay from "@/components/NoteOverlay"
+import { useState } from "react"
 
 const NotesPage = () => {
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false)
+
+  const openOverlay = () => setIsOverlayOpen(true)
+  const closeOverlay = () => setIsOverlayOpen(false)
+
   return (
-    <div className="bg-primary flex min-h-screen w-screen justify-center px-[127px] pt-[92px]">
+    <div className="bg-primary relative flex min-h-screen w-screen justify-center px-[127px] pt-[92px]">
       {/* Sidebar */}
       <div className="absolute left-4 top-4 flex h-1/2 w-[40px] flex-col items-center rounded-full border border-gray-200 bg-white px-2 py-4 shadow-lg">
         <TodoIcon width="24" height="24" />
       </div>
 
       {/* Main container */}
-      <div className="flex w-4/5 flex-col items-center rounded-lg border border-gray-100 bg-white pt-12 shadow-xl">
+      <div className="relative flex w-4/5 flex-col items-center rounded-lg border border-gray-100 bg-white pt-12 shadow-xl">
         <div className="w-full flex-grow px-8">
-          <button className="flex items-center justify-center rounded-full bg-[#54A268] px-6 py-2 text-white shadow-md hover:bg-green-700">
+          <button
+            onClick={openOverlay}
+            className="flex items-center justify-center rounded-full bg-[#54A268] px-6 py-2 text-white shadow-md hover:bg-green-700"
+          >
             Open Child Document
           </button>
         </div>
+
+        {/* Note Overlay */}
+        {isOverlayOpen && <NoteOverlay onClose={closeOverlay} />}
       </div>
 
       {/* Account info */}
