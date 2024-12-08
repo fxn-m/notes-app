@@ -7,7 +7,8 @@ export default {
       backgroundColor: {
         primary: "#fffcf9",
         secondary: "#ffed4a",
-        danger: "#e3342f"
+        danger: "#e3342f",
+        success: "#54a268"
       },
       borderRadius: {
         lg: "var(--radius)",

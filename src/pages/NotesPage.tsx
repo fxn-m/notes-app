@@ -1,6 +1,7 @@
 import NoteOverlay, { StickyNoteType } from "@/components/NoteOverlay"
 
 import { AvatarMenu } from "@/components/avatar-menu"
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
 type NoteBookType = {
@@ -44,15 +45,16 @@ const NotesPage = () => {
       {/* Main container */}
       <div className="relative flex w-2/3 flex-col items-center rounded-lg border border-gray-100 bg-white pt-12 shadow-xl sm:w-[500px] md:w-[650px] lg:w-[800px] xl:w-[900px] 2xl:w-[1200px]">
         <div className="w-full flex-grow px-8">
-          <button
+          <Button
             onClick={() => {
               setActiveBook(null)
               setIsOverlayOpen(true)
             }}
-            className="flex items-center justify-center rounded-full bg-[#54A268] px-6 py-2 text-white shadow-md hover:bg-green-700"
+            variant={"default"}
+            className="rounded-full px-6"
           >
             Create New Notebook
-          </button>
+          </Button>
 
           {/* Notebooks */}
           <div className="mt-8 grid grid-cols-2 gap-4">

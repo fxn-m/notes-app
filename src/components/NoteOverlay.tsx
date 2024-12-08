@@ -1,6 +1,7 @@
 import { Menu, StickyNote } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
+import { Button } from "./ui/button"
 import Draggable from "react-draggable"
 
 interface NoteOverlayProps {
@@ -20,6 +21,7 @@ const ANIMATION_DURATION = 500
 export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
   const [stickyNotes, setStickyNotes] = useState<StickyNoteType[]>(notes)
   const [isVisible, setIsVisible] = useState(false)
+  const [showNoteInput, setShowNoteInput] = useState(false)
 
   const overlayRef = useRef<HTMLDivElement>(null) // Ref for the parent container
 
@@ -34,7 +36,7 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
     }, ANIMATION_DURATION)
   }
 
-  const addStickyNote = () => {
+  const addStickyNote = (content: string) => {
     const randomX = Math.floor(Math.random() * 80) + 10
     const randomY = Math.floor(Math.random() * 80) + 10
     setStickyNotes([
@@ -43,7 +45,7 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
         id: Date.now(),
         xPercent: randomX,
         yPercent: randomY,
-        content: "New Note"
+        content
       }
     ])
   }
@@ -73,7 +75,7 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
   return (
     <div
       ref={overlayRef}
-      className={`group absolute inset-0 z-20 flex cursor-pointer items-start justify-center transition ${isVisible ? "translate-y-0" : "translate-y-full"}`}
+      className={`group absolute inset-0 z-20 flex max-h-screen cursor-pointer flex-col items-center justify-start transition ${isVisible ? "translate-y-0" : "translate-y-full"}`}
       style={{
         transitionDuration: `${ANIMATION_DURATION}ms`
       }}
@@ -82,7 +84,7 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
       <div className="peer absolute h-3 w-full bg-transparent" onClick={handleClose} />
 
       {/* Overlay */}
-      <div className="relative mt-3 h-full w-full scale-x-110 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2">
+      <div className="relative mt-3 w-full flex-1 scale-x-110 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2">
         {/* Top-left Tab */}
         <div className="absolute -top-1 left-12 h-8 w-28">
           <div className="absolute -ml-1 h-0 w-0 border-b-[4px] border-l-[4px] border-transparent border-b-[#f4d7a4]"></div>
@@ -98,13 +100,43 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
 
         {/* Draggable Pill */}
         <Draggable axis="y" bounds="parent" handle=".drag-handle">
-          <div className="absolute -right-4 top-1/4 flex h-64 w-8 flex-col rounded-full bg-white py-4 shadow-md">
-            <div className="flex cursor-pointer justify-center" onClick={addStickyNote}>
+          <div className="absolute -right-4 top-1/4 z-50 flex h-64 w-8 flex-col rounded-full bg-white py-4 shadow-md">
+            <div className="flex cursor-pointer justify-center" onClick={() => setShowNoteInput(!showNoteInput)}>
               <StickyNote size={20} className="text-yellow-500" />
             </div>
 
             <div className="flex flex-1 items-center justify-center">
               <Menu size={16} className="drag-handle cursor-pointer text-gray-400" />
+            </div>
+
+            <div
+              className={`absolute -left-4 top-0 z-50 -translate-x-full border border-gray-100 ${showNoteInput ? "flex" : "hidden"} h-48 w-72 flex-col rounded-lg bg-white p-4 shadow-md`}
+            >
+              <textarea
+                placeholder="Write text for sticky note..."
+                className="h-full w-full resize-none bg-transparent p-2 text-left align-top outline-none"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault() // Prevent newline on Enter
+                    addStickyNote(e.currentTarget.value)
+                    e.currentTarget.value = ""
+                  }
+                }}
+              />
+
+              <Button
+                onClick={(e) => {
+                  const input = e.currentTarget.previousSibling as HTMLInputElement
+                  if (input.value.trim() !== "") {
+                    addStickyNote(input.value)
+                  }
+                  input.value = ""
+                }}
+                className="w-40 rounded-full"
+                variant={"default"}
+              >
+                Add Sticky Note
+              </Button>
             </div>
           </div>
         </Draggable>
@@ -138,7 +170,7 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
                 )
               }}
             >
-              <div className="absolute cursor-pointer rounded-lg bg-white p-4 shadow-md">{note.content}</div>
+              <div className="absolute cursor-pointer whitespace-pre-wrap break-words rounded-lg bg-white p-4 shadow-md">{note.content}</div>
             </Draggable>
           )
         })}
