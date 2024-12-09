@@ -3,11 +3,13 @@ import { useEffect, useRef, useState } from "react"
 
 import { Button } from "./ui/button"
 import Draggable from "react-draggable"
+import { NoteBookType } from "@/pages/NotesPage"
+import { UserInfo } from "@/App"
 
 interface NoteOverlayProps {
   onClose: (updatedNotes: StickyNoteType[]) => void
-  name: string
-  notes: StickyNoteType[]
+  activeBook: NoteBookType
+  userInfo: UserInfo
 }
 
 export type StickyNoteType = {
@@ -19,8 +21,8 @@ export type StickyNoteType = {
 
 const ANIMATION_DURATION = 500
 
-export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) {
-  const [stickyNotes, setStickyNotes] = useState<StickyNoteType[]>(notes)
+export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverlayProps) {
+  const [stickyNotes, setStickyNotes] = useState<StickyNoteType[]>(activeBook.notes || [])
   const [isVisible, setIsVisible] = useState(false)
   const [showNoteInput, setShowNoteInput] = useState(false)
 
@@ -37,21 +39,70 @@ export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) 
     }, ANIMATION_DURATION)
   }
 
-  const addStickyNote = (content: string) => {
+  const addStickyNote = async (content: string, notebookId: string, userId: string) => {
     const randomX = Math.floor(Math.random() * 80) + 10
     const randomY = Math.floor(Math.random() * 80) + 10
-    setStickyNotes([
-      ...stickyNotes,
-      {
-        id: Date.now(),
-        xPercent: randomX,
-        yPercent: randomY,
-        content
+
+    try {
+      // Send a POST request to upload the new note
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${notebookId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId,
+          xPercent: randomX,
+          yPercent: randomY,
+          content
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to upload note to server")
       }
-    ])
+
+      // Extract the newly created note from the response
+      const { note } = await response.json()
+
+      // Update the sticky notes state with the server-generated note
+      setStickyNotes((prevNotes) => [
+        ...prevNotes,
+        {
+          id: note.id, // Use the ID returned from the server
+          xPercent: note.xPercent,
+          yPercent: note.yPercent,
+          content: note.content
+        }
+      ])
+    } catch (error) {
+      console.error("Error adding sticky note:", error)
+    }
   }
 
   useEffect(() => {
+    // Fetch all notes on first render
+    const fetchNotes = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${activeBook.id}?userId=${userInfo.id}`, {})
+        if (!response.ok) {
+          throw new Error("Failed to fetch notes")
+        }
+        const { notes } = await response.json()
+        setStickyNotes(
+          notes.map((note: StickyNoteType) => ({
+            ...note,
+            xPercent: Math.min(note.xPercent, 100),
+            yPercent: Math.min(note.yPercent, 100)
+          }))
+        )
+      } catch (error) {
+        console.error("Error fetching notes:", error)
+      }
+    }
+
+    fetchNotes()
+
     const resizeObserver = new ResizeObserver(() => {
       if (overlayRef.current) {
         setStickyNotes((prevNotes) =>
@@ -71,7 +122,7 @@ export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) 
     }
 
     return () => resizeObserver.disconnect()
-  }, [])
+  }, [activeBook.id, userInfo.id])
 
   return (
     <div
@@ -88,7 +139,7 @@ export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) 
       <div className="relative mt-3 w-full flex-1 scale-x-110 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2">
         {/* Header */}
         <div className="mx-4 mt-6 flex items-baseline justify-between border-b border-gray-100 p-4">
-          <h1 className="text-lg font-semibold">{name}</h1>
+          <h1 className="text-lg font-semibold">{activeBook.name}</h1>
         </div>
 
         {/* Top-left Tab */}
@@ -123,8 +174,8 @@ export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) 
                 className="h-full w-full resize-none bg-transparent p-2 text-left align-top outline-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault() // Prevent newline on Enter
-                    addStickyNote(e.currentTarget.value)
+                    e.preventDefault()
+                    addStickyNote(e.currentTarget.value, activeBook.id, userInfo.id)
                     e.currentTarget.value = ""
                   }
                 }}
@@ -134,7 +185,7 @@ export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) 
                 onClick={(e) => {
                   const input = e.currentTarget.previousSibling as HTMLInputElement
                   if (input.value.trim() !== "") {
-                    addStickyNote(input.value)
+                    addStickyNote(input.value, activeBook.id, userInfo.id)
                   }
                   input.value = ""
                 }}
@@ -174,6 +225,18 @@ export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) 
                       : n
                   )
                 )
+
+                // Update the note on the server
+                fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${note.id}`, {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    xPercent: (data.x / offsetWidth) * 100,
+                    yPercent: (data.y / offsetHeight) * 100
+                  })
+                })
               }}
             >
               <div className="absolute cursor-pointer whitespace-pre-wrap break-words rounded-lg bg-white p-4 shadow-md">{note.content}</div>

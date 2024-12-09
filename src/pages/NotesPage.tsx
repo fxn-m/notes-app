@@ -123,7 +123,7 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
         </div>
 
         {/* Note Overlay */}
-        {isOverlayOpen && <NoteOverlay onClose={closeOverlay} notes={activeBook ? activeBook.notes : []} name={activeBook ? activeBook.name : ""} />}
+        {isOverlayOpen && activeBook && <NoteOverlay onClose={closeOverlay} activeBook={activeBook} userInfo={userInfo} />}
       </div>
 
       {/* Account info */}
