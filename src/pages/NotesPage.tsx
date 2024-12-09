@@ -64,7 +64,6 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   }, [userInfo])
 
   const closeOverlay = (updatedNotes: StickyNoteType[]) => {
-    console.log("Updated notes:", updatedNotes)
     setNoteBooks((prevBooks) => {
       if (activeBook && activeBook.id && prevBooks.some((book) => book.id === activeBook.id)) {
         return prevBooks.map((book) => (book.id === activeBook.id ? { ...book, notes: updatedNotes } : book))

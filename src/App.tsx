@@ -33,7 +33,6 @@ const App = () => {
 
   useEffect(() => {
     const fetchUserInfo = async (token: string) => {
-      console.log("Fetching user info...")
       const { user } = await verifyToken(token)
       if (!user) {
         setIsAuthenticated(false)

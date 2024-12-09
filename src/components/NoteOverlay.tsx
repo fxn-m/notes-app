@@ -168,10 +168,10 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
       }}
     >
       {/* Gap */}
-      <div className="peer absolute h-3 w-full bg-transparent" onClick={handleClose} />
+      <div className="peer absolute h-5 w-full bg-transparent" onClick={handleClose} />
 
       {/* Overlay */}
-      <div className="relative mt-3 w-full flex-1 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2 sm:scale-x-110">
+      <div className="relative mt-5 w-full flex-1 scale-x-110 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2">
         {/* Header */}
         <div className="items-top flex justify-between border-b border-gray-100 p-2">
           <div className="mx-4 mt-6 flex items-baseline justify-between p-2">
