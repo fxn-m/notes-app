@@ -15,7 +15,7 @@ export type UserInfo = {
 const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
 
 const verifyToken = async (token: string) => {
-  const response = await fetch(`${VITE_SERVER_URL}/auth/verify-token`, {
+  const response = await fetch(`${VITE_SERVER_URL}/auth/verify-token/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -33,6 +33,7 @@ const App = () => {
 
   useEffect(() => {
     const fetchUserInfo = async (token: string) => {
+      console.log("Fetching user info...")
       const { user } = await verifyToken(token)
       if (!user) {
         setIsAuthenticated(false)

@@ -171,10 +171,16 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
       <div className="peer absolute h-3 w-full bg-transparent" onClick={handleClose} />
 
       {/* Overlay */}
-      <div className="relative mt-3 w-full flex-1 scale-x-110 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2">
+      <div className="relative mt-3 w-full flex-1 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2 sm:scale-x-110">
         {/* Header */}
-        <div className="mx-4 mt-6 flex items-baseline justify-between border-b border-gray-100 p-4">
-          <h1 className="text-lg font-semibold">{activeBook.name}</h1>
+        <div className="items-top flex justify-between border-b border-gray-100 p-2">
+          <div className="mx-4 mt-6 flex items-baseline justify-between p-2">
+            <h1 className="text-lg font-semibold">{activeBook.name}</h1>
+          </div>
+          <button onClick={handleClose} className="items-top flex gap-1 p-2 leading-none text-gray-600 hover:text-red-500 sm:hidden">
+            <span className="inline-block">Close</span>
+            <X size={18} className="inline-block" />
+          </button>
         </div>
 
         {/* Top-left Tab */}
@@ -254,6 +260,7 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
             <Draggable
               key={note.id}
               bounds="parent"
+              cancel=".delete-button"
               position={{ x: positionX, y: positionY }}
               onStop={(_, data) => {
                 setStickyNotes((prevNotes) =>
@@ -286,11 +293,11 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
 
                 {/* Delete Icon */}
                 <button
-                  className="absolute right-1 top-1 text-gray-500 transition-colors hover:text-red-500"
+                  className="delete-button absolute right-0 top-0 text-gray-500 transition-colors sm:hover:text-red-500"
                   onClick={() => handleDeleteNote(note.id, userInfo.id, setStickyNotes)}
                   title="Delete Note"
                 >
-                  <X className="hidden group-hover/note:block" size={16} />
+                  <X className="m-1 group-hover/note:block sm:hidden" size={16} />
                 </button>
 
                 {/* Fold Effect */}

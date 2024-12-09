@@ -72,14 +72,15 @@ const NotebookCard = ({ book, noteBooks, userInfo, setActiveBook, setIsOverlayOp
           value={editedName}
           onChange={(e) => setEditedName(e.target.value)}
           onClick={(e) => e.stopPropagation()}
-          className="flex-1 bg-transparent text-lg font-medium outline-none"
+          className="min-w-0 flex-1 bg-transparent text-lg font-medium leading-none outline-none"
           autoFocus
+          maxLength={16}
         />
       ) : (
-        <h2 className="select-none text-lg font-medium">{book.name}</h2>
+        <h2 className="min-w-0 flex-1 select-none text-lg font-medium leading-none">{book.name}</h2>
       )}
 
-      <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="flex items-center gap-2 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
         {isEditing ? (
           <>
             <button onClick={handleEdit} className="rounded-full p-1 hover:bg-green-50">
