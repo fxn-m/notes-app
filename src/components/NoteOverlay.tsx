@@ -1,10 +1,11 @@
-import { Menu, StickyNote } from "lucide-react"
+import { Menu, StickyNote, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "./ui/button"
 import Draggable from "react-draggable"
 import { NoteBookType } from "@/pages/NotesPage"
 import { UserInfo } from "@/App"
+import { v4 as uuidv4 } from "uuid"
 
 interface NoteOverlayProps {
   onClose: (updatedNotes: StickyNoteType[]) => void
@@ -13,7 +14,7 @@ interface NoteOverlayProps {
 }
 
 export type StickyNoteType = {
-  id: number
+  id: string
   xPercent: number
   yPercent: number
   content: string
@@ -27,9 +28,22 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
   const [showNoteInput, setShowNoteInput] = useState(false)
 
   const overlayRef = useRef<HTMLDivElement>(null) // Ref for the parent container
+  const inputContainerRef = useRef<HTMLDivElement>(null) // Ref for the input container
 
   useEffect(() => {
     setIsVisible(true)
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (inputContainerRef.current && !inputContainerRef.current.contains(e.target as Node)) {
+        setShowNoteInput(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
   }, [])
 
   const handleClose = () => {
@@ -39,12 +53,46 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
     }, ANIMATION_DURATION)
   }
 
+  const handleDeleteNote = async (noteId: string, userId: string, setStickyNotes: React.Dispatch<React.SetStateAction<StickyNoteType[]>>) => {
+    try {
+      setStickyNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId))
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${noteId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ userId })
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete note")
+      }
+    } catch (error) {
+      console.error("Error deleting note:", error)
+    }
+  }
+
   const addStickyNote = async (content: string, notebookId: string, userId: string) => {
-    const randomX = Math.floor(Math.random() * 80) + 10
-    const randomY = Math.floor(Math.random() * 80) + 10
+    if (content.trim() === "") {
+      return
+    }
+
+    const randomX = Math.floor(Math.random() * 60) + 20
+    const randomY = Math.floor(Math.random() * 60) + 10
 
     try {
-      // Send a POST request to upload the new note
+      const id = uuidv4()
+
+      setStickyNotes((prevNotes) => [
+        ...prevNotes,
+        {
+          id,
+          xPercent: randomX,
+          yPercent: randomY,
+          content
+        }
+      ])
+
       const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${notebookId}`, {
         method: "POST",
         headers: {
@@ -52,6 +100,7 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
         },
         body: JSON.stringify({
           userId,
+          id,
           xPercent: randomX,
           yPercent: randomY,
           content
@@ -61,20 +110,6 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
       if (!response.ok) {
         throw new Error("Failed to upload note to server")
       }
-
-      // Extract the newly created note from the response
-      const { note } = await response.json()
-
-      // Update the sticky notes state with the server-generated note
-      setStickyNotes((prevNotes) => [
-        ...prevNotes,
-        {
-          id: note.id, // Use the ID returned from the server
-          xPercent: note.xPercent,
-          yPercent: note.yPercent,
-          content: note.content
-        }
-      ])
     } catch (error) {
       console.error("Error adding sticky note:", error)
     }
@@ -158,7 +193,13 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
         {/* Draggable Pill */}
         <Draggable axis="y" bounds="parent" handle=".drag-handle">
           <div className="absolute -right-4 top-1/4 z-50 flex h-64 w-8 flex-col rounded-full bg-white py-4 shadow-md">
-            <div className="flex cursor-pointer justify-center" onClick={() => setShowNoteInput(!showNoteInput)}>
+            <div
+              className="flex cursor-pointer justify-center"
+              onMouseDown={(event) => {
+                event.stopPropagation()
+                setShowNoteInput(!showNoteInput)
+              }}
+            >
               <StickyNote size={20} className="text-yellow-500" />
             </div>
 
@@ -168,6 +209,7 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
 
             <div
               className={`absolute -left-4 top-0 z-50 -translate-x-full border border-gray-100 ${showNoteInput ? "flex" : "hidden"} h-48 w-72 flex-col rounded-lg bg-white p-4 shadow-md`}
+              ref={inputContainerRef}
             >
               <textarea
                 placeholder="Write text for sticky note..."
@@ -226,7 +268,6 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
                   )
                 )
 
-                // Update the note on the server
                 fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${note.id}`, {
                   method: "PATCH",
                   headers: {
@@ -239,7 +280,28 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
                 })
               }}
             >
-              <div className="absolute cursor-pointer whitespace-pre-wrap break-words rounded-lg bg-white p-4 shadow-md">{note.content}</div>
+              <div className="group/note absolute max-w-48 cursor-pointer whitespace-pre-wrap text-wrap break-words rounded-lg bg-yellow-200 p-4 shadow-lg">
+                {/* Note Content */}
+                {note.content}
+
+                {/* Delete Icon */}
+                <button
+                  className="absolute right-1 top-1 text-gray-500 transition-colors hover:text-red-500"
+                  onClick={() => handleDeleteNote(note.id, userInfo.id, setStickyNotes)}
+                  title="Delete Note"
+                >
+                  <X className="hidden group-hover/note:block" size={16} />
+                </button>
+
+                {/* Fold Effect */}
+                <div
+                  className="absolute bottom-0 right-0 h-1 w-4 bg-yellow-300"
+                  style={{
+                    clipPath: "polygon(0 0, 100% 100%, 0 100%)",
+                    backgroundColor: "rgba(0, 0, 0, 0.05)"
+                  }}
+                ></div>
+              </div>
             </Draggable>
           )
         })}

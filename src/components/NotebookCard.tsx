@@ -20,6 +20,7 @@ const NotebookCard = ({ book, noteBooks, userInfo, setActiveBook, setIsOverlayOp
   const handleDelete = async (event: React.MouseEvent) => {
     event.stopPropagation()
     try {
+      setNoteBooks(noteBooks.filter((b: NoteBookType) => b.id !== book.id))
       await fetch(`${import.meta.env.VITE_SERVER_URL}/notebooks/${book.id}`, {
         method: "DELETE",
         headers: {
@@ -27,7 +28,6 @@ const NotebookCard = ({ book, noteBooks, userInfo, setActiveBook, setIsOverlayOp
         },
         body: JSON.stringify({ userId: userInfo.id })
       })
-      setNoteBooks(noteBooks.filter((b: NoteBookType) => b.id !== book.id))
     } catch (error) {
       console.error("Failed to delete notebook:", error)
     }
@@ -58,7 +58,7 @@ const NotebookCard = ({ book, noteBooks, userInfo, setActiveBook, setIsOverlayOp
 
   return (
     <div
-      className="group relative flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:shadow"
+      className="group relative flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:shadow"
       onClick={() => {
         if (!isEditing) {
           setActiveBook(book)

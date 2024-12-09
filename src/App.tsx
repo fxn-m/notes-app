@@ -53,7 +53,7 @@ const App = () => {
     } else {
       setIsAuthenticated(false)
     }
-  }, [])
+  }, [isAuthenticated])
 
   const handleLogout = () => {
     localStorage.removeItem("google_id_token")

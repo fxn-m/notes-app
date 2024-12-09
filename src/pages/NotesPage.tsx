@@ -1,12 +1,12 @@
 import NoteOverlay, { StickyNoteType } from "@/components/NoteOverlay"
+import { useEffect, useState } from "react"
 
 import { AvatarMenu } from "@/components/avatar-menu"
 import { Button } from "@/components/ui/button"
+import { Loader2 } from "lucide-react"
 import NotebookCard from "@/components/NotebookCard"
+import { UserInfo } from "@/App"
 import { v4 as uuidv4 } from "uuid"
-
-import { useEffect, useState } from "react"
-import { type UserInfo } from "@/App"
 
 export type NoteBookType = {
   id: string
@@ -21,6 +21,7 @@ export type NotesPageProps = {
 
 const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [noteBooks, setNoteBooks] = useState<NoteBookType[]>([])
   const [activeBook, setActiveBook] = useState<NoteBookType | null>(null)
 
@@ -45,6 +46,7 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   useEffect(() => {
     const fetchNoteBooks = async () => {
       try {
+        setIsLoading(true)
         const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notebooks?userId=${userInfo.id}`, {
           method: "GET",
           headers: {
@@ -55,6 +57,8 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
         setNoteBooks(data.notebooks)
       } catch (error) {
         console.error("Failed to fetch notebooks:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -107,19 +111,25 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
           </Button>
 
           {/* Notebooks */}
-          <div className="mt-8 grid grid-cols-2 gap-4">
-            {noteBooks.map((book) => (
-              <NotebookCard
-                key={book.id}
-                book={book}
-                noteBooks={noteBooks}
-                userInfo={userInfo}
-                setActiveBook={setActiveBook}
-                setIsOverlayOpen={setIsOverlayOpen}
-                setNoteBooks={setNoteBooks}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex h-1/2 w-full flex-col items-center justify-center">
+              <Loader2 size={36} className="animate-spin text-yellow-400" />
+            </div>
+          ) : (
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              {noteBooks.map((book) => (
+                <NotebookCard
+                  key={book.id}
+                  book={book}
+                  noteBooks={noteBooks}
+                  userInfo={userInfo}
+                  setActiveBook={setActiveBook}
+                  setIsOverlayOpen={setIsOverlayOpen}
+                  setNoteBooks={setNoteBooks}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Note Overlay */}
