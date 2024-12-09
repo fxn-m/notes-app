@@ -2,11 +2,14 @@ import NoteOverlay, { StickyNoteType } from "@/components/NoteOverlay"
 
 import { AvatarMenu } from "@/components/avatar-menu"
 import { Button } from "@/components/ui/button"
+import NotebookCard from "@/components/NotebookCard"
+import { v4 as uuidv4 } from "uuid"
+
 import { useEffect, useState } from "react"
 import { type UserInfo } from "@/App"
 
-type NoteBookType = {
-  id: number
+export type NoteBookType = {
+  id: string
   name: string
   notes: StickyNoteType[]
 }
@@ -23,15 +26,17 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
 
   const createNotebook = async (userId: string, name: string) => {
     try {
+      const id = uuidv4()
       const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notebooks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ userId, name })
+        body: JSON.stringify({ id, userId, name })
       })
       const data = await response.json()
       console.log("Created notebook:", data)
+      return id
     } catch (error) {
       console.error("Failed to create notebook:", error)
     }
@@ -57,14 +62,15 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   }, [userInfo])
 
   const closeOverlay = (updatedNotes: StickyNoteType[]) => {
+    console.log("Updated notes:", updatedNotes)
     setNoteBooks((prevBooks) => {
-      if (activeBook) {
+      if (activeBook && activeBook.id && prevBooks.some((book) => book.id === activeBook.id)) {
         return prevBooks.map((book) => (book.id === activeBook.id ? { ...book, notes: updatedNotes } : book))
       } else {
         return [
           ...prevBooks,
           {
-            id: Date.now(),
+            id: activeBook !== null ? activeBook.id : uuidv4(),
             name: `Notebook ${prevBooks.length + 1}`,
             notes: updatedNotes
           }
@@ -87,10 +93,12 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
       <div className="relative flex w-2/3 flex-col items-center rounded-lg border border-gray-100 bg-white pt-12 shadow-xl sm:w-[500px] md:w-[650px] lg:w-[800px] xl:w-[900px] 2xl:w-[1200px]">
         <div className="w-full flex-grow px-8">
           <Button
-            onClick={() => {
+            onClick={async () => {
               setActiveBook(null)
               setIsOverlayOpen(true)
-              createNotebook(userInfo.id, `Notebook ${noteBooks.length + 1}`)
+              const id = await createNotebook(userInfo.id, `Notebook ${noteBooks.length + 1}`)
+              if (!id) return
+              setActiveBook({ id, name: `Notebook ${noteBooks.length + 1}`, notes: [] })
             }}
             variant={"default"}
             className="rounded-full px-6"
@@ -115,7 +123,7 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
         </div>
 
         {/* Note Overlay */}
-        {isOverlayOpen && <NoteOverlay onClose={closeOverlay} notes={activeBook ? activeBook.notes : []} />}
+        {isOverlayOpen && <NoteOverlay onClose={closeOverlay} notes={activeBook ? activeBook.notes : []} name={activeBook ? activeBook.name : ""} />}
       </div>
 
       {/* Account info */}
@@ -134,114 +142,5 @@ const TodoIcon = ({ width = "40", height = "40" }) => (
     <path d="M25 45 L40 60 L65 30" fill="none" stroke="#2E2E2E" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 )
-
-import { Pencil, Trash2, X, Check } from "lucide-react"
-
-type NotebookCardProps = {
-  book: NoteBookType
-  noteBooks: NoteBookType[]
-  userInfo: UserInfo
-  setActiveBook: (book: NoteBookType) => void
-  setIsOverlayOpen: (isOpen: boolean) => void
-  setNoteBooks: (books: NoteBookType[] | ((prevBooks: NoteBookType[]) => NoteBookType[])) => void
-}
-
-const NotebookCard = ({ book, noteBooks, userInfo, setActiveBook, setIsOverlayOpen, setNoteBooks }: NotebookCardProps) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedName, setEditedName] = useState(book.name)
-
-  const handleDelete = async (event: React.MouseEvent) => {
-    event.stopPropagation()
-    try {
-      await fetch(`${import.meta.env.VITE_SERVER_URL}/notebooks/${book.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ userId: userInfo.id })
-      })
-      setNoteBooks(noteBooks.filter((b: NoteBookType) => b.id !== book.id))
-    } catch (error) {
-      console.error("Failed to delete notebook:", error)
-    }
-  }
-
-  const handleEdit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation()
-    if (!isEditing) {
-      setIsEditing(true)
-      return
-    }
-
-    try {
-      await fetch(`${import.meta.env.VITE_SERVER_URL}/notebooks/${book.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name: editedName })
-      })
-
-      setNoteBooks((prevBooks) => prevBooks.map((b) => (b.id === book.id ? { ...b, name: editedName } : b)))
-      setIsEditing(false)
-    } catch (error) {
-      console.error("Failed to update notebook:", error)
-    }
-  }
-
-  return (
-    <div
-      className="group relative flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:shadow"
-      onClick={() => {
-        if (!isEditing) {
-          setActiveBook(book)
-          setIsOverlayOpen(true)
-        }
-      }}
-    >
-      {isEditing ? (
-        <input
-          type="text"
-          value={editedName}
-          onChange={(e) => setEditedName(e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          className="flex-1 bg-transparent text-lg font-medium outline-none"
-          autoFocus
-        />
-      ) : (
-        <h2 className="text-lg font-medium">{book.name}</h2>
-      )}
-
-      <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-        {isEditing ? (
-          <>
-            <button onClick={handleEdit} className="rounded-full p-1 hover:bg-green-50">
-              <Check className="h-4 w-4 text-green-600" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsEditing(false)
-                setEditedName(book.name)
-              }}
-              className="rounded-full p-1 hover:bg-gray-100"
-            >
-              <X className="h-4 w-4 text-gray-600" />
-            </button>
-          </>
-        ) : (
-          <>
-            <button onClick={handleEdit} className="rounded-full p-1 hover:bg-gray-100">
-              <Pencil className="h-4 w-4 text-gray-600" />
-            </button>
-            <button onClick={handleDelete} className="rounded-full p-1 hover:bg-red-50">
-              <Trash2 className="h-4 w-4 text-red-600" />
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
 
 export default NotesPage

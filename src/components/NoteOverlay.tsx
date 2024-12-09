@@ -6,6 +6,7 @@ import Draggable from "react-draggable"
 
 interface NoteOverlayProps {
   onClose: (updatedNotes: StickyNoteType[]) => void
+  name: string
   notes: StickyNoteType[]
 }
 
@@ -18,7 +19,7 @@ export type StickyNoteType = {
 
 const ANIMATION_DURATION = 500
 
-export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
+export default function NoteOverlay({ onClose, name, notes }: NoteOverlayProps) {
   const [stickyNotes, setStickyNotes] = useState<StickyNoteType[]>(notes)
   const [isVisible, setIsVisible] = useState(false)
   const [showNoteInput, setShowNoteInput] = useState(false)
@@ -85,6 +86,11 @@ export default function NoteOverlay({ onClose, notes }: NoteOverlayProps) {
 
       {/* Overlay */}
       <div className="relative mt-3 w-full flex-1 scale-x-110 cursor-default rounded-lg border border-gray-100 bg-white shadow-lg transition-transform duration-300 peer-hover:translate-y-2">
+        {/* Header */}
+        <div className="mx-4 mt-6 flex items-baseline justify-between border-b border-gray-100 p-4">
+          <h1 className="text-lg font-semibold">{name}</h1>
+        </div>
+
         {/* Top-left Tab */}
         <div className="absolute -top-1 left-12 h-8 w-28">
           <div className="absolute -ml-1 h-0 w-0 border-b-[4px] border-l-[4px] border-transparent border-b-[#f4d7a4]"></div>
