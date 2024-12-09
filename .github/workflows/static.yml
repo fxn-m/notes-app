@@ -34,7 +34,6 @@ jobs:
 
       - name: Build project
         env:
-            # VITE_SERVER_URL: "http://localhost:3000"
             VITE_SERVER_URL: "https://notes-app-server-6dbt.onrender.com"
         run: npm run build
 

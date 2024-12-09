@@ -99,43 +99,41 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
 
       {/* Main container */}
       <div className="relative flex w-10/12 flex-grow flex-col items-center rounded-lg border border-gray-100 bg-white px-8 shadow-xl sm:w-[500px] sm:pt-8 md:w-[650px] lg:w-[800px] xl:w-[900px] 2xl:w-[1200px]">
-        <div className="w-full flex-grow">
-          <Button
-            onClick={async () => {
-              setActiveBook(null)
-              setIsOverlayOpen(true)
-              const id = await createNotebook(userInfo.id, `Notebook ${noteBooks.length + 1}`)
-              if (!id) return
-              setActiveBook({ id, name: `Notebook ${noteBooks.length + 1}`, notes: [] })
-            }}
-            variant={"default"}
-            className="absolute bottom-4 right-4 flex h-14 w-14 items-center justify-center rounded-full p-2 text-white shadow-lg transition-all hover:bg-green-600 sm:static sm:mb-4 sm:h-auto sm:w-auto sm:px-6"
-          >
-            <BookPlus className="!h-6 !w-6 sm:hidden" />
-            <span className="hidden sm:inline">Create New Notebook</span>
-          </Button>
+        <Button
+          onClick={async () => {
+            setActiveBook(null)
+            const id = await createNotebook(userInfo.id, `Notebook ${noteBooks.length + 1}`)
+            if (!id) return
+            setIsOverlayOpen(true)
+            setActiveBook({ id, name: `Notebook ${noteBooks.length + 1}`, notes: [] })
+          }}
+          variant={"default"}
+          className="absolute bottom-4 right-4 flex h-14 w-14 items-center justify-center rounded-full p-2 text-white shadow-lg transition-all hover:bg-green-600 sm:static sm:mb-4 sm:h-auto sm:w-auto sm:self-start sm:px-6"
+        >
+          <BookPlus className="!h-6 !w-6 sm:hidden" />
+          <span className="hidden sm:inline">Create New Notebook</span>
+        </Button>
 
-          {/* Notebooks */}
-          {isLoading ? (
-            <div className="flex h-1/2 w-full flex-col items-center justify-center">
-              <Loader2 size={36} className="animate-spin text-yellow-400" />
-            </div>
-          ) : (
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {noteBooks.map((book) => (
-                <NotebookCard
-                  key={book.id}
-                  book={book}
-                  noteBooks={noteBooks}
-                  userInfo={userInfo}
-                  setActiveBook={setActiveBook}
-                  setIsOverlayOpen={setIsOverlayOpen}
-                  setNoteBooks={setNoteBooks}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Notebooks */}
+        {isLoading ? (
+          <div className="flex max-h-96 w-full flex-grow items-center justify-center">
+            <Loader2 size={36} className="animate-spin text-yellow-400" />
+          </div>
+        ) : (
+          <div className="mt-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {noteBooks.map((book) => (
+              <NotebookCard
+                key={book.id}
+                book={book}
+                noteBooks={noteBooks}
+                userInfo={userInfo}
+                setActiveBook={setActiveBook}
+                setIsOverlayOpen={setIsOverlayOpen}
+                setNoteBooks={setNoteBooks}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Note Overlay */}
         {isOverlayOpen && activeBook && <NoteOverlay onClose={closeOverlay} activeBook={activeBook} userInfo={userInfo} />}
