@@ -20,7 +20,10 @@ export function AvatarMenu({ onLogout, userInfo }: AvatarMenuProps) {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full shadow-xl">
+        <Button
+          variant="ghost"
+          className={`relative h-10 w-10 transform rounded-full shadow-xl transition-transform duration-200 ${isOpen ? "scale-110" : "hover:scale-110"}`}
+        >
           <Avatar>
             <AvatarImage src={userInfo.picture} alt="@username" />
             <AvatarFallback>
@@ -29,7 +32,7 @@ export function AvatarMenu({ onLogout, userInfo }: AvatarMenuProps) {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56 focus:outline-none focus:ring-0" align="end" forceMount onCloseAutoFocus={(e) => e.preventDefault()}>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{userInfo.name}</p>
@@ -41,7 +44,7 @@ export function AvatarMenu({ onLogout, userInfo }: AvatarMenuProps) {
           onClick={() => {
             onLogout()
           }}
-          className="text-red-500 focus:text-red-500"
+          className="cursor-pointer text-red-500 focus:text-red-500"
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>

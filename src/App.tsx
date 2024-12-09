@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { GoogleOAuthProvider } from "@react-oauth/google"
 import LoginPage from "@/pages/LoginPage"
 import NotesPage from "@/pages/NotesPage"
-import { jwtDecode } from "jwt-decode"
 
 export type UserInfo = {
   name: string
@@ -12,16 +11,35 @@ export type UserInfo = {
   picture: string
 }
 
+const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
+
+const verifyToken = async (token: string) => {
+  const response = await fetch(`${VITE_SERVER_URL}/verify-token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ google_token: token })
+  })
+
+  const data = await response.json()
+  return data
+}
+
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [userInfo, setUserInfo] = useState<UserInfo>({ name: "", email: "", picture: "" })
 
   useEffect(() => {
+    const fetchUserInfo = async (token: string) => {
+      const { user } = await verifyToken(token)
+      setUserInfo(user)
+    }
+
     const token = localStorage.getItem("google_id_token")
     if (token) {
       try {
-        const decoded: { email: string; name: string; picture: string } = jwtDecode(token)
-        setUserInfo(decoded)
+        fetchUserInfo(token)
         setIsAuthenticated(true)
       } catch (error) {
         console.error("Failed to decode token:", error)
