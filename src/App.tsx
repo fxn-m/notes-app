@@ -6,6 +6,7 @@ import LoginPage from "@/pages/LoginPage"
 import NotesPage from "@/pages/NotesPage"
 
 export type UserInfo = {
+  id: string
   name: string
   email: string
   picture: string
@@ -14,7 +15,7 @@ export type UserInfo = {
 const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
 
 const verifyToken = async (token: string) => {
-  const response = await fetch(`${VITE_SERVER_URL}/verify-token`, {
+  const response = await fetch(`${VITE_SERVER_URL}/auth/verify-token`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -28,19 +29,23 @@ const verifyToken = async (token: string) => {
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
-  const [userInfo, setUserInfo] = useState<UserInfo>({ name: "", email: "", picture: "" })
+  const [userInfo, setUserInfo] = useState<UserInfo>({ id: "", name: "", email: "", picture: "" })
 
   useEffect(() => {
     const fetchUserInfo = async (token: string) => {
       const { user } = await verifyToken(token)
+      if (!user) {
+        setIsAuthenticated(false)
+        return
+      }
       setUserInfo(user)
+      setIsAuthenticated(true)
     }
 
     const token = localStorage.getItem("google_id_token")
     if (token) {
       try {
         fetchUserInfo(token)
-        setIsAuthenticated(true)
       } catch (error) {
         console.error("Failed to decode token:", error)
         setIsAuthenticated(false)
