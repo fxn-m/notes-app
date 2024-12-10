@@ -1,5 +1,6 @@
-import { BookPlus, Loader2 } from "lucide-react"
+import { BookPlus, Loader2, RefreshCw } from "lucide-react"
 import { NoteBookType, NotesPageProps, StickyNoteType } from "@/types"
+import { createNotebook, fetchNoteBooks } from "@/lib/utils"
 import { useEffect, useState } from "react"
 
 import { AvatarMenu } from "@/components/avatar-menu"
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import NoteOverlay from "@/components/NoteOverlay"
 import NotebookCard from "@/components/NotebookCard"
 import TodoIcon from "@/assets/TodoIcon"
-import { createNotebook } from "@/lib/utils"
 import { v4 as uuidv4 } from "uuid"
 
 const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
@@ -15,30 +15,13 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const [noteBooks, setNoteBooks] = useState<NoteBookType[]>([])
   const [activeBook, setActiveBook] = useState<NoteBookType | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchNoteBooks = async () => {
-      try {
-        setIsLoading(true)
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notebooks?userId=${userInfo.id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
-        const data = await response.json()
-        setNoteBooks(data.notebooks)
-      } catch (error) {
-        console.error("Failed to fetch notebooks:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchNoteBooks()
+    fetchNoteBooks({ userInfo, setIsLoading, setError, setNoteBooks })
   }, [userInfo])
 
-  // Create a new notebook locally, open the overlay, and create the notebook in the database
+  // Create a new notebook, open the overlay, and persist to the database
   const handleCreateNotebook = () => {
     const name = `Notebook ${noteBooks.length + 1}`
     const id = uuidv4()
@@ -49,7 +32,7 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
     createNotebook(id, userId, name)
   }
 
-  // Update the notes in the active notebook and close the overlay
+  // Update the notes for the active notebook and close the overlay
   const closeOverlay = (updatedNotes: StickyNoteType[]) => {
     setNoteBooks((prevBooks) => {
       if (activeBook && activeBook.id && prevBooks.some((book) => book.id === activeBook.id)) {
@@ -88,17 +71,26 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
       <div className="relative flex w-10/12 flex-grow flex-col items-center rounded-lg border border-gray-100 bg-white px-8 shadow-xl sm:w-[500px] sm:pt-8 md:w-[650px] lg:w-[800px] xl:w-[900px] 2xl:w-[1200px]">
         <Button
           onClick={handleCreateNotebook}
-          variant={"default"}
+          variant="default"
           className="absolute bottom-4 right-4 flex h-14 w-14 items-center justify-center rounded-full p-2 text-white shadow-lg transition-all hover:bg-green-600 sm:static sm:mb-4 sm:h-auto sm:w-auto sm:self-start sm:px-6"
         >
           <BookPlus className="!h-6 !w-6 sm:hidden" />
           <span className="hidden sm:inline">Create New Notebook</span>
         </Button>
 
-        {/* Notebooks */}
         {isLoading ? (
           <div className="flex max-h-96 w-full flex-grow items-center justify-center">
             <Loader2 size={36} className="animate-spin text-yellow-400" />
+          </div>
+        ) : error ? (
+          <div className="flex max-h-96 flex-grow flex-col items-center justify-center">
+            <div className="flex w-full items-center justify-center text-red-500">{error}</div>
+            <div>
+              <Button onClick={() => window.location.reload()} variant="outline" className="mt-4">
+                <RefreshCw className="mr-1 !h-4 !w-4" />
+                Try Again
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="mt-8 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
