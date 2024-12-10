@@ -57,7 +57,7 @@ const NotebookCard = ({ book, noteBooks, userInfo, setActiveBook, setIsOverlayOp
 
   return (
     <div
-      className="group relative flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:shadow"
+      className="group relative flex min-h-16 cursor-pointer items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:shadow"
       onClick={() => {
         if (!isEditing) {
           setActiveBook(book)
@@ -79,7 +79,7 @@ const NotebookCard = ({ book, noteBooks, userInfo, setActiveBook, setIsOverlayOp
         <h2 className="min-w-0 flex-1 select-none text-lg font-medium leading-none">{book.name}</h2>
       )}
 
-      <div className="flex items-center gap-2 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+      <div className="flex items-center gap-2 transition-opacity sm:hidden sm:opacity-0 sm:group-hover:flex sm:group-hover:opacity-100">
         {isEditing ? (
           <>
             <button onClick={handleEdit} className="rounded-full p-1 hover:bg-green-50">
