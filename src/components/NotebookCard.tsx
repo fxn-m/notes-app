@@ -1,7 +1,6 @@
 import { Check, Pencil, Trash2, X } from "lucide-react"
+import { NoteBookType, UserInfo } from "@/types"
 
-import { NoteBookType } from "@/pages/NotesPage"
-import { UserInfo } from "@/App"
 import { useState } from "react"
 
 type NotebookCardProps = {

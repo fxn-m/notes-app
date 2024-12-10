@@ -1,45 +1,20 @@
 import { BookPlus, Loader2 } from "lucide-react"
-import NoteOverlay, { StickyNoteType } from "@/components/NoteOverlay"
+import { NoteBookType, NotesPageProps, StickyNoteType } from "@/types"
 import { useEffect, useState } from "react"
 
 import { AvatarMenu } from "@/components/avatar-menu"
 import { Button } from "@/components/ui/button"
+import NoteOverlay from "@/components/NoteOverlay"
 import NotebookCard from "@/components/NotebookCard"
-import { UserInfo } from "@/App"
+import TodoIcon from "@/assets/TodoIcon"
+import { createNotebook } from "@/lib/utils"
 import { v4 as uuidv4 } from "uuid"
-
-export type NoteBookType = {
-  id: string
-  name: string
-  notes: StickyNoteType[]
-}
-
-export type NotesPageProps = {
-  onLogout: () => void
-  userInfo: UserInfo
-}
 
 const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [noteBooks, setNoteBooks] = useState<NoteBookType[]>([])
   const [activeBook, setActiveBook] = useState<NoteBookType | null>(null)
-
-  const createNotebook = async (userId: string, name: string) => {
-    try {
-      const id = uuidv4()
-      await fetch(`${import.meta.env.VITE_SERVER_URL}/notebooks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ id, userId, name })
-      })
-      return id
-    } catch (error) {
-      console.error("Failed to create notebook:", error)
-    }
-  }
 
   useEffect(() => {
     const fetchNoteBooks = async () => {
@@ -63,6 +38,18 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
     fetchNoteBooks()
   }, [userInfo])
 
+  // Create a new notebook locally, open the overlay, and create the notebook in the database
+  const handleCreateNotebook = () => {
+    const name = `Notebook ${noteBooks.length + 1}`
+    const id = uuidv4()
+    const userId = userInfo.id
+
+    setActiveBook({ id, name, notes: [] })
+    setIsOverlayOpen(true)
+    createNotebook(id, userId, name)
+  }
+
+  // Update the notes in the active notebook and close the overlay
   const closeOverlay = (updatedNotes: StickyNoteType[]) => {
     setNoteBooks((prevBooks) => {
       if (activeBook && activeBook.id && prevBooks.some((book) => book.id === activeBook.id)) {
@@ -100,13 +87,7 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
       {/* Main container */}
       <div className="relative flex w-10/12 flex-grow flex-col items-center rounded-lg border border-gray-100 bg-white px-8 shadow-xl sm:w-[500px] sm:pt-8 md:w-[650px] lg:w-[800px] xl:w-[900px] 2xl:w-[1200px]">
         <Button
-          onClick={async () => {
-            setActiveBook(null)
-            const id = await createNotebook(userInfo.id, `Notebook ${noteBooks.length + 1}`)
-            if (!id) return
-            setIsOverlayOpen(true)
-            setActiveBook({ id, name: `Notebook ${noteBooks.length + 1}`, notes: [] })
-          }}
+          onClick={handleCreateNotebook}
           variant={"default"}
           className="absolute bottom-4 right-4 flex h-14 w-14 items-center justify-center rounded-full p-2 text-white shadow-lg transition-all hover:bg-green-600 sm:static sm:mb-4 sm:h-auto sm:w-auto sm:self-start sm:px-6"
         >
@@ -141,14 +122,5 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
     </div>
   )
 }
-
-const TodoIcon = ({ width = "40", height = "40" }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width={width} height={height} className="text-current">
-    <rect x="15" y="15" width="70" height="70" rx="15" fill="#FF7043" />
-    <rect x="10" y="10" width="70" height="70" rx="15" fill="#FFA726" />
-    <rect x="5" y="5" width="70" height="70" rx="15" fill="#FFB74D" />
-    <path d="M25 45 L40 60 L65 30" fill="none" stroke="#2E2E2E" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-)
 
 export default NotesPage

@@ -4,13 +4,7 @@ import { useEffect, useState } from "react"
 import { GoogleOAuthProvider } from "@react-oauth/google"
 import LoginPage from "@/pages/LoginPage"
 import NotesPage from "@/pages/NotesPage"
-
-export type UserInfo = {
-  id: string
-  name: string
-  email: string
-  picture: string
-}
+import { UserInfo } from "@/types"
 
 const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
 

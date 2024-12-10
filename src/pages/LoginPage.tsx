@@ -1,6 +1,6 @@
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
 
-interface LoginPageProps {
+type LoginPageProps = {
   setAuth: (value: boolean) => void
 }
 

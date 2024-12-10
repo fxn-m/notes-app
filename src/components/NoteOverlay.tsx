@@ -1,24 +1,10 @@
 import { Menu, StickyNote, X } from "lucide-react"
+import { NoteOverlayProps, StickyNoteType } from "@/types"
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "./ui/button"
 import Draggable from "react-draggable"
-import { NoteBookType } from "@/pages/NotesPage"
-import { UserInfo } from "@/App"
 import { v4 as uuidv4 } from "uuid"
-
-interface NoteOverlayProps {
-  onClose: (updatedNotes: StickyNoteType[]) => void
-  activeBook: NoteBookType
-  userInfo: UserInfo
-}
-
-export type StickyNoteType = {
-  id: string
-  xPercent: number
-  yPercent: number
-  content: string
-}
 
 const ANIMATION_DURATION = 500
 

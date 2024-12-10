@@ -12,7 +12,7 @@ import { LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
-import { type NotesPageProps as AvatarMenuProps } from "@/pages/NotesPage"
+import { type NotesPageProps as AvatarMenuProps } from "@/types"
 
 export function AvatarMenu({ onLogout, userInfo }: AvatarMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -36,7 +36,7 @@ export function AvatarMenu({ onLogout, userInfo }: AvatarMenuProps) {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{userInfo.name}</p>
-            <p className="text-muted-foreground text-xs leading-none">{userInfo.email}</p>
+            <p className="text-xs leading-none text-muted-foreground">{userInfo.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
