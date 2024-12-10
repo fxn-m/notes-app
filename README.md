@@ -1,50 +1,72 @@
-# React + TypeScript + Vite
+# Youni Notes App 📒
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[Link to live application](https://fxn-m.com/notes-app)
 
-Currently, two official plugins are available:
+In order to sign in, your google account will have to be added to the test users config.
+Please [let me know](mailto:fnewportmangell@gmail.com) if you're unable to authenticate with your google account and I'll add you.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*Note: Due to cold starts, please wait a minute the first time you load the app!*
 
-## Expanding the ESLint configuration
+## Intro
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+This Notes App is a full-stack application that allows users to create and manage notebooks filled with sticky notes. It provides a user-friendly interface with draggable notes, responsive layout, and the ability to create and open notebooks, each containing multiple notes.
 
-- Configure the top-level `parserOptions` property like this:
+**Features**
+- Create New Notebooks: Add multiple notebooks to organize your notes by topic or category.
+- Sticky Notes: Each notebook supports multiple sticky notes that can be created and moved around.
+- Responsive Layout: The UI adapts to various screen sizes, from mobile to desktop.
+- PWA: [VitePWA](https://vite-pwa-org.netlify.app/) was used to turn Notes App into a PWA.
+- Authentication with Google OAuth
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+**Technology Stack**
+- Frontend: React + TypeScript, Tailwind CSS for styling, Vite for bundling.
+- Backend: Node.js/Express + TypeScript with DrizzleORM providing APIs to fetch, create, and manage notebooks and notes.
+  - Server hosted on Render. 
+  - Database hosted on Supabase.
+
+## Getting Started
+### 1.	Clone the Repository:
+
+```bash
+git clone https://github.com/fxn-m/notes-app
+cd notes-app
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### 2.	Install Dependencies:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+```bash
+npm install
+```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+### 3.	Set Environment Variables (Optional):
+**If runing the server locally**, create a .env file in the root directory and specify the server URL :
+
+```bash
+VITE_SERVER_URL=http://localhost:3000
+```
+
+### 4.	Run the Backend (Optional):
+
+```bash
+cd notes-app-server
+npm install
+npm run dev
+```
+
+Make sure it runs on the same URL and port you specified in VITE_SERVER_URL.
+
+### 5.	Run the Frontend:
+
+#### Running development server
+```bash
+cd notes-app
+npm run dev
+```
+
+This will start the development server at http://localhost:5173.
+
+#### Running production
+```bash
+cd notes-app
+npm run preview
 ```
