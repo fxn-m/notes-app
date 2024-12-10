@@ -18,6 +18,7 @@ const NotesPage = ({ onLogout, userInfo }: NotesPageProps) => {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!userInfo) return
     fetchNoteBooks({ userInfo, setIsLoading, setError, setNoteBooks })
   }, [userInfo])
 
