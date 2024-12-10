@@ -8,6 +8,33 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export const fetchUserInfo = async ({
+  token,
+  setIsAuthenticated,
+  setUserInfo,
+  setLoading
+}: {
+  token: string
+  setIsAuthenticated: (isAuthenticated: boolean) => void
+  setUserInfo: (userInfo: UserInfo) => void
+  setLoading: (isLoading: boolean) => void
+}): Promise<void> => {
+  try {
+    const { user } = await verifyToken(token)
+    if (!user) {
+      setIsAuthenticated(false)
+    } else {
+      setUserInfo(user)
+      setIsAuthenticated(true)
+    }
+  } catch (error) {
+    console.error("Failed to decode token:", error)
+    setIsAuthenticated(false)
+  } finally {
+    setLoading(false)
+  }
+}
+
 export const fetchNoteBooks = async ({
   userInfo,
   setIsLoading,
