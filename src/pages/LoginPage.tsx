@@ -1,8 +1,6 @@
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
 
-type LoginPageProps = {
-  setAuth: (value: boolean) => void
-}
+import { LoginPageProps } from "@/types"
 
 export default function LoginPage({ setAuth }: LoginPageProps) {
   const handleSuccess = (credentialResponse: CredentialResponse) => {

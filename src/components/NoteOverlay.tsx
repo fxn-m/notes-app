@@ -32,6 +32,50 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
     }
   }, [])
 
+  useEffect(() => {
+    // Fetch all notes on first render
+    const fetchNotes = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${activeBook.id}?userId=${userInfo.id}`, {})
+        if (!response.ok) {
+          throw new Error("Failed to fetch notes")
+        }
+        const { notes } = await response.json()
+        setStickyNotes(
+          notes.map((note: StickyNoteType) => ({
+            ...note,
+            xPercent: Math.min(note.xPercent, 100),
+            yPercent: Math.min(note.yPercent, 100)
+          }))
+        )
+      } catch (error) {
+        console.error("Error fetching notes:", error)
+      }
+    }
+
+    fetchNotes()
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (overlayRef.current) {
+        setStickyNotes((prevNotes) =>
+          prevNotes.map((note) => {
+            return {
+              ...note,
+              xPercent: Math.min(note.xPercent, 100),
+              yPercent: Math.min(note.yPercent, 100)
+            }
+          })
+        )
+      }
+    })
+
+    if (overlayRef.current) {
+      resizeObserver.observe(overlayRef.current)
+    }
+
+    return () => resizeObserver.disconnect()
+  }, [activeBook.id, userInfo.id])
+
   const handleClose = () => {
     setIsVisible(false)
     setTimeout(() => {
@@ -100,50 +144,6 @@ export default function NoteOverlay({ onClose, activeBook, userInfo }: NoteOverl
       console.error("Error adding sticky note:", error)
     }
   }
-
-  useEffect(() => {
-    // Fetch all notes on first render
-    const fetchNotes = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/notes/${activeBook.id}?userId=${userInfo.id}`, {})
-        if (!response.ok) {
-          throw new Error("Failed to fetch notes")
-        }
-        const { notes } = await response.json()
-        setStickyNotes(
-          notes.map((note: StickyNoteType) => ({
-            ...note,
-            xPercent: Math.min(note.xPercent, 100),
-            yPercent: Math.min(note.yPercent, 100)
-          }))
-        )
-      } catch (error) {
-        console.error("Error fetching notes:", error)
-      }
-    }
-
-    fetchNotes()
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (overlayRef.current) {
-        setStickyNotes((prevNotes) =>
-          prevNotes.map((note) => {
-            return {
-              ...note,
-              xPercent: Math.min(note.xPercent, 100),
-              yPercent: Math.min(note.yPercent, 100)
-            }
-          })
-        )
-      }
-    })
-
-    if (overlayRef.current) {
-      resizeObserver.observe(overlayRef.current)
-    }
-
-    return () => resizeObserver.disconnect()
-  }, [activeBook.id, userInfo.id])
 
   return (
     <div

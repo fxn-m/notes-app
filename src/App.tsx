@@ -5,21 +5,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import LoginPage from "@/pages/LoginPage"
 import NotesPage from "@/pages/NotesPage"
 import { UserInfo } from "@/types"
-
-const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL
-
-const verifyToken = async (token: string) => {
-  const response = await fetch(`${VITE_SERVER_URL}/auth/verify-token/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ google_token: token })
-  })
-
-  const data = await response.json()
-  return data
-}
+import { verifyToken } from "./lib/utils"
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)

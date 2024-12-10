@@ -28,3 +28,7 @@ export type NoteOverlayProps = {
   activeBook: NoteBookType
   userInfo: UserInfo
 }
+
+export type LoginPageProps = {
+  setAuth: (value: boolean) => void
+}
